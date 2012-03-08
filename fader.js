@@ -1,4 +1,4 @@
-/* *
+/**
  * Slider.constructor
  * @param args: A javascript object with constructor flags as follows
  *		container:  an HTML element that will be the faders container 
@@ -19,7 +19,8 @@ function Fader(args){
 	this.currentframe = 0;
 	this.frameheight = 0;
 	this.framewidth = 0;
-	this.zmax = 0;	
+	this.zmax = 0;
+	this.repositioncontainer = true;
 	
 	
 	if(!("container" in args)){
@@ -33,18 +34,27 @@ function Fader(args){
 	// same for framerate.
 	this.framerate = ("framerate" in args) ? args.framerate : 30; 	// we'll use 30 fps as the default.
 	this.milliseconds = ("milliseconds" in args)  ? args.milliseconds   : 1000;   // we'll use a default animation time of 1 second.
-	
+	this.repositioncontainer = ("repositioncontainer" in args) ? args.repositioncontainer : true  // by default, we have to reposition the container. 
+
+
 	// init a list of frames.
 	this.frames = [];
 	
 	
 	// now get the frames list and calculate the frames.
 	this.calcFrames();
+
+	// now initialize the styles.
 	this.initStyles();
 	
 }
 
 
+/**
+ * Fader.calcFrames
+ * Calculates the number of frames found inside the container. By frame, we 
+ * mean immediate children where the classlist includes framename.
+ */
 Fader.prototype.calcFrames = function(){
 	var children = this.container.children;
 	var framename = this.framename;
@@ -59,12 +69,23 @@ Fader.prototype.calcFrames = function(){
 }
 
 
+/**
+ * Fader.initStyles
+ * initializes the necessary styles for the Slider. The container element is 
+ * given relative positioning and the slides are given absolute positioning. 
+ * We also set the frames opacity and z-indecies to 1 or 0 depending on which 
+ * slide we want to show (0 by default)
+ */
 Fader.prototype.initStyles = function(){
 	this.framewidth = this.frames[0].offsetWidth;
 	this.frameheight = this.frames[0].offsetHeight;
 
 	this.container.style.overflow = "hidden";
-	this.container.style.position = "relative";
+
+	// we will only reposition the container if we are told to (although the default
+	// is to do the repositioning). This could come in handy if the designer wants
+	// the container positioned a bsolutely or fixed.
+	if(this.repositioncontainer) { this.container.style.position = "relative"; }   
 	this.container.style.width = this.framewidth + "px";
 	this.container.style.height = this.frameheight + "px";
 	
@@ -81,13 +102,27 @@ Fader.prototype.initStyles = function(){
 }
 
 
+/** 
+ * Fader.animationClosure
+ * @param frame: the frame whose opacity we will be setting (HTMLElement)
+ * @param o: the opacity value that we will give the frame. (float)
+ * @return a function reference to an anonymous function that will give the given
+ * element the given opacity. Used with setTimout for animations.
+ */
 Fader.prototype.animationclosure = function(frame, o){
-		return (function(){
-			frame.style.opacity = o;
-		});
+	return (function(){
+		frame.style.opacity = o;
+	});
 	
-	}
+}
 
+/**
+ * Fader.zclosure
+ * @param e: the element we will style
+ * @param z: the zindex we will give to the elemtn.
+ * @return a reference funciton that will sets e's zindex to z.
+ * useful for animation with settimeout
+ */
 Fader.prototype.zclosure = function(e, z){
 	return (function(){
 		e.style.zIndex = z;
@@ -95,6 +130,12 @@ Fader.prototype.zclosure = function(e, z){
 
 }
 
+
+/**
+ * Fader.showFrame
+ * @param n: the index of the frame to show. 
+ * Shows frame number n.
+ */
 Fader.prototype.showFrame = function(n){
 	
 	var frame = this.frames[n]; 
