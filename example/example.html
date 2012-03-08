@@ -1,0 +1,26 @@
+<!DOCTYPE HTML>
+<html>
+	<head>
+		<title>LiteFader Test</title>
+		<script src="https://raw.github.com/leeavital/LiteFader/master/fader.min.js" type="text/javascript"></script>
+	</head>
+	<body>
+		<div id="container">
+			<div class="frame" style="color: white; background-color: blue;">Wait two seconds for the next slide...</div>
+			<div class="frame" style="color: red; background-color: black;">Hello, this is my next slide.</div>
+			<div class="frame" style="color: black; background-color: red;">And this is my last slide.</div>
+			
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		fader = new Fader({
+			container: document.getElementById("container"),
+			framename: "frame",
+			milliseconds: 500,
+			framerate: 20
+		});
+		
+		setInterval(function(){fader.next();}, 2000);
+	</script>
+</html>
